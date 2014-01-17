@@ -1,0 +1,33 @@
+{
+ "issue": "1.1", 
+ "tracks": [
+  {
+   "duration": "12", 
+   "message-colour": "white", 
+   "message-font": "Helvetica 20 bold", 
+   "text": "This example is a continuous repeating mediashow\n\nA menu can selected during any track\n\nUse  where a slideshow is used to draw attention to the menu of videos\n", 
+   "title": "A message from the author", 
+   "track-ref": "", 
+   "type": "message"
+  }, 
+  {
+   "sub-show": "mymenu", 
+   "title": "Child Menu", 
+   "track-ref": "pp-child-show", 
+   "type": "show"
+  }, 
+  {
+   "duration": "5", 
+   "location": "+/media/sarename.gif", 
+   "title": "Sarename", 
+   "track-ref": "", 
+   "track-text": "", 
+   "track-text-colour": "", 
+   "track-text-font": "", 
+   "track-text-x": "0", 
+   "track-text-y": "0", 
+   "transition": "cut", 
+   "type": "image"
+  }
+ ]
+}

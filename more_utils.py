@@ -1,4 +1,4 @@
-import re
+import re, datetime
 
 def ProcessFileName(Filename):
     #Split retrieved filename
@@ -11,12 +11,25 @@ def ProcessFileName(Filename):
     for each in SFileName:
         if ("dur" in each):
             Dur = each.replace("dur", "")
-            #print Dur
+            if Dur.isdigit() != True:
+                Dur = ""
+            #print Dur  
         if("start" in each):
             Start = each.replace("start", "")
+            if validate(Start) == -1:
+                Start = ""
             #print Start
         if("exp" in each):
             Exp = each.replace("exp", "")
-            #print Exp
-
+            if validate(Exp) == -1:
+                Exp = ""
+            #print Exp  
     return [Dur, Start, Exp]
+
+def validate(date_text):
+    try:
+        datetime.datetime.strptime(date_text, '%m-%d-%Y')
+        return 1
+    except ValueError:
+        return -1
+

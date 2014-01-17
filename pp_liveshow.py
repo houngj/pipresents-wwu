@@ -6,6 +6,8 @@ import Tkinter as tk
 import PIL.Image
 import PIL.ImageTk
 import PIL.ImageEnhance
+import time
+import shutil
 
 from more_utils import ProcessFileName 
 from pp_imageplayer import ImagePlayer
@@ -286,7 +288,7 @@ class LiveShow:
                 if ext_file.lower() in PPdefinitions.IMAGE_FILES+PPdefinitions.VIDEO_FILES+PPdefinitions.AUDIO_FILES+PPdefinitions.WEB_FILES or (ext_file.lower()=='.cfg'):
                     self.livelist_add_track(file)
                     
-
+        
         self.new_livelist= sorted(self.new_livelist, key= lambda track: os.path.basename(track['location']).lower())
         # print 'LIVELIST'
         # for it in self.new_livelist:
@@ -304,8 +306,8 @@ class LiveShow:
    
     def livelist_next(self):
         
+        skip = False
         
-    
         if self.livelist_index== len(self.livelist)-1:
             self.livelist_index=0
         else:
@@ -315,11 +317,31 @@ class LiveShow:
         runningFileName = self.livelist[self.livelist_index]['title']
         
         dur = ProcessFileName(runningFileName)[0]
+        startDate = ProcessFileName(runningFileName)[1]
+        endDate = ProcessFileName(runningFileName)[2]
+        
         if dur == "":
             global defaultDur
             dur = defaultDur
-        
-        self.showlist.assign_dur(dur);
+
+        if startDate != "":
+            startDate = startDate.replace("-", "/")
+            curDate = time.strftime('%m/%d/%Y')
+            if startDate > curDate:
+                print dur
+                self.livelist_index +=1
+                skip = True
+                
+        if skip == False:
+            if endDate != "":
+                endDate = endDate.replace("-", "/")
+                if endDate >= time.strftime('%m/%d/%Y'):
+                
+                    src = os.path.abspath(os.path.join(os.getcwd(), os.pardir))+"/pp_home/pp_live_tracks/" + runningFileName
+                    dst = os.path.abspath(os.path.join(os.getcwd(), os.pardir))+"/pp_home/pp_live_tracks/Archived/"
+    
+                    shutil.move(src, dst)
+            self.showlist.assign_dur(dur);
 
         
 
