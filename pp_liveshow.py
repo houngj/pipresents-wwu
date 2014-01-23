@@ -10,6 +10,7 @@ import time
 import shutil
 
 from more_utils import ProcessFileName 
+from more_utils import toArchive
 from pp_imageplayer import ImagePlayer
 from pp_videoplayer import VideoPlayer
 from pp_audioplayer import AudioPlayer
@@ -312,38 +313,37 @@ class LiveShow:
             self.livelist_index=0
         else:
             self.livelist_index +=1
-        
+            
+        #Author Joe Houng  ------------------------------------------------
+
         #get properties from file name if it exists
         runningFileName = self.livelist[self.livelist_index]['title']
+        fileNameTupel = ProcessFileName(runningFileName)
+        dur = fileNameTupel[0]
+        startDate = fileNameTupel[1]
+        endDate = fileNameTupel[2]
         
-        dur = ProcessFileName(runningFileName)[0]
-        startDate = ProcessFileName(runningFileName)[1]
-        endDate = ProcessFileName(runningFileName)[2]
         
         if dur == "":
+            #dur not specified in filename
             global defaultDur
             dur = defaultDur
 
         if startDate != "":
-            startDate = startDate.replace("-", "/")
-            curDate = time.strftime('%m/%d/%Y')
-            if startDate > curDate:
+            curDate = time.strftime('%Y-%m-%d-%H-%M-%S')
+            if startDate < curDate:
                 print dur
                 self.livelist_index +=1
                 skip = True
                 
         if skip == False:
             if endDate != "":
-                endDate = endDate.replace("-", "/")
-                if endDate >= time.strftime('%m/%d/%Y'):
-                
-                    src = os.path.abspath(os.path.join(os.getcwd(), os.pardir))+"/pp_home/pp_live_tracks/" + runningFileName
-                    dst = os.path.abspath(os.path.join(os.getcwd(), os.pardir))+"/pp_home/pp_live_tracks/Archived/"
-    
-                    shutil.move(src, dst)
+                if endDate <= time.strftime('%Y-%m-%d-%H-%M-%S'):
+                    toArchive(runningFileName)            
             self.showlist.assign_dur(dur);
+        skip = False
 
-        
+        #------------------------------------------------------------------
 
 # ***************************
 # Sequencing
@@ -389,7 +389,7 @@ class LiveShow:
 
     def play_first_track(self):
         self.state='playing'
-        
+        skip = False
         # start duration timer
         if self.show_params['trigger-end']=='duration':
             # print 'set alarm ', self.duration
@@ -400,22 +400,42 @@ class LiveShow:
         
         
         self.livelist_index = 0
+        
+        #Author Joe Houng  ------------------------------------------------
 
         #get properties from file name if it exists
         runningFileName = self.livelist[self.livelist_index]['title']
-        dur = ProcessFileName(runningFileName)[0]
+
+        fileNameTupel = ProcessFileName(runningFileName)
+        dur = fileNameTupel[0]
+        startDate = fileNameTupel[1]
+        endDate = fileNameTupel[2]
+        
+        
         if dur == "":
+            #dur not specified in filename
             global defaultDur
             dur = defaultDur
-        self.showlist.assign_dur(dur);
+
+        if startDate != "":
+            curDate = time.strftime('%Y-%m-%d')
+            if startDate > curDate:
+                print dur
+                self.livelist_index +=1
+                skip = True
+                
+        if skip == False:
+            if endDate != "":
+                if endDate >= time.strftime('%Y-%m-%d'):
+                    toArchive(runningFileName)            
+            self.showlist.assign_dur(dur);
+        skip = False
+
+        #----------------------------------------------------------------
 
         self.play_track()
         
         
-    #author:houngj
-    #def LiveFilelist(self):
-    #    for File in self.new_livelist:
-    #        print File['title']
             
             
         
