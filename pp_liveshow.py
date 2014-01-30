@@ -240,10 +240,12 @@ class LiveShow:
 # ***************************       
         
     def livelist_add_track(self,afile):
+        
         (root,title)=os.path.split(afile)
         (root_plus,ext)= os.path.splitext(afile)
         if ext.lower() in PPdefinitions.IMAGE_FILES:
             self.livelist_new_track(PPdefinitions.new_tracks['image'],{'title':title,'track-ref':'','location':afile})
+            #print afile
         if ext.lower() in PPdefinitions.VIDEO_FILES:
             self.livelist_new_track(PPdefinitions.new_tracks['video'],{'title':title,'track-ref':'','location':afile})
         if ext.lower() in PPdefinitions.AUDIO_FILES:
@@ -266,6 +268,7 @@ class LiveShow:
         
     def livelist_new_track(self,fields,values):
         new_track=fields
+        print("new file %s\n" %values['title'])
         self.new_livelist.append(copy.deepcopy(new_track))
         last = len(self.new_livelist)-1
         self.new_livelist[last].update(values)        
@@ -291,10 +294,7 @@ class LiveShow:
                     
         
         self.new_livelist= sorted(self.new_livelist, key= lambda track: os.path.basename(track['location']).lower())
-        # print 'LIVELIST'
-        # for it in self.new_livelist:
-            # print 'type: ', it['type'], 'loc: ',it['location'],'\nplugin cfg: ', it['plugin']
-        # print ''
+        
 
 
     
@@ -302,7 +302,8 @@ class LiveShow:
         self.new_livelist_create()
         if  self.new_livelist<>self.livelist:
             self.livelist=copy.deepcopy(self.new_livelist)
-            self.livelist_index=0
+            self.livelist_index = 1
+
    
    
     def livelist_next(self):
@@ -322,7 +323,7 @@ class LiveShow:
         dur = fileNameTupel[0]
         startDate = fileNameTupel[1]
         endDate = fileNameTupel[2]
-        
+        print(runningFileName)
         
         if dur == "":
             #dur not specified in filename
@@ -331,16 +332,20 @@ class LiveShow:
 
         if startDate != "":
             curDate = time.strftime('%Y-%m-%d-%H-%M-%S')
-            if startDate < curDate:
+            if startDate > curDate:
                 print dur
                 self.livelist_index +=1
                 skip = True
+                dur = defaultDur
                 
         if skip == False:
             if endDate != "":
                 if endDate <= time.strftime('%Y-%m-%d-%H-%M-%S'):
-                    toArchive(runningFileName)            
-            self.showlist.assign_dur(dur);
+                    try:
+                        toArchive(runningFileName)
+                    except Error:
+                        None
+        self.showlist.assign_dur(dur);
         skip = False
 
         #------------------------------------------------------------------
@@ -426,7 +431,7 @@ class LiveShow:
                 
         if skip == False:
             if endDate != "":
-                if endDate >= time.strftime('%Y-%m-%d'):
+                if endDate <= time.strftime('%Y-%m-%d'):
                     toArchive(runningFileName)            
             self.showlist.assign_dur(dur);
         skip = False
