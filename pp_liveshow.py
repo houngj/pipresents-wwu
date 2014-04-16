@@ -7,6 +7,7 @@ import PIL.Image
 import PIL.ImageTk
 import PIL.ImageEnhance
 
+from more_utils import ProcessFileName 
 from pp_imageplayer import ImagePlayer
 from pp_videoplayer import VideoPlayer
 from pp_audioplayer import AudioPlayer
@@ -19,6 +20,8 @@ from pp_timeofday import TimeOfDay
 from pp_options import command_options
 from pp_controlsmanager import ControlsManager
 from pp_utils import Monitor
+
+defaultDur = None
 
 class LiveShow:
     """ plays a set of tracks the content of which is dynamically specified by plaacing track files
@@ -50,13 +53,12 @@ class LiveShow:
         self.pp_dir=pp_dir
         self.pp_home=pp_home
         self.pp_profile=pp_profile
-
+        
         # open resources
         self.rr=ResourceReader()
-
+        
         #create and instance of TimeOfDay scheduler so we can add events
         self.tod=TimeOfDay()
-
 
         # Init variables
         self.player=None
@@ -72,8 +74,10 @@ class LiveShow:
         self.new_livelist= None
 
 
-
     def play(self,show_id,end_callback,ready_callback, top=False,command='nil'):
+        global defaultDur
+        if defaultDur == None:
+            defaultDur = self.showlist.get_dur()
 
         #instantiate the arguments
         self.show_id=show_id
@@ -81,13 +85,16 @@ class LiveShow:
         self.ready_callback=ready_callback
         self.top=top
         self.mon.log(self,"Starting show: " + self.show_params['show-ref'])
-
+        
+        
+        
         # check  data files are available.
         self.media_file = self.pp_profile + os.sep + self.show_params['medialist']
         if not os.path.exists(self.media_file):
             self.mon.err(self,"Medialist file not found: "+ self.media_file)
             self.end_liveshow_signal=True
-            
+        
+        
         self.options=command_options()
                
         self.pp_live_dir1 = self.pp_home + os.sep + 'pp_live_tracks'
@@ -100,10 +107,11 @@ class LiveShow:
             if not os.path.exists(self.pp_live_dir2):
                 self.mon.err(self,"live tracks directory not found " + self.pp_live_dir2)
                 self.end('error',"live tracks directory not found")
-
+        
         #create a medialist for the liveshow and read it.
         # it should be empty of anonymous tracks but read it to check its version.
         self.medialist=MediaList()
+        
         if self.medialist.open_list(self.media_file,self.showlist.sissue())==False:
             self.mon.err(self,"Version of medialist different to Pi Presents")
             self.end('error',"Version of medialist different to Pi Presents")
@@ -133,7 +141,7 @@ class LiveShow:
             if error_text<>'':
                 self.mon.err(self,error_text)
                 self.end('error',error_text)       
-
+        
         self.wait_for_trigger()                
 
 
@@ -295,11 +303,25 @@ class LiveShow:
    
    
     def livelist_next(self):
+        
+        
+    
         if self.livelist_index== len(self.livelist)-1:
             self.livelist_index=0
         else:
             self.livelist_index +=1
+        
+        #get properties from file name if it exists
+        runningFileName = self.livelist[self.livelist_index]['title']
+        
+        dur = ProcessFileName(runningFileName)[0]
+        if dur == "":
+            global defaultDur
+            dur = defaultDur
+        
+        self.showlist.assign_dur(dur);
 
+        
 
 # ***************************
 # Sequencing
@@ -332,7 +354,7 @@ class LiveShow:
 
     # callbacks from time of day scheduler
     def tod_start_callback(self):
-         if self.state=='waiting' and self.show_params['trigger-start']in('time','time-quiet'):
+        if self.state=='waiting' and self.show_params['trigger-start']in('time','time-quiet'):
             self.play_first_track()      
 
     def tod_end_callback(self):
@@ -345,15 +367,35 @@ class LiveShow:
 
     def play_first_track(self):
         self.state='playing'
+        
         # start duration timer
         if self.show_params['trigger-end']=='duration':
             # print 'set alarm ', self.duration
             self.duration_timer = self.canvas.after(self.duration*1000,self.tod_end_callback)
+        
         self.new_livelist_create()
         self.livelist = copy.deepcopy(self.new_livelist)
+        
+        
         self.livelist_index = 0
-        self.play_track()
 
+        #get properties from file name if it exists
+        runningFileName = self.livelist[self.livelist_index]['title']
+        dur = ProcessFileName(runningFileName)[0]
+        if dur == "":
+            global defaultDur
+            dur = defaultDur
+        self.showlist.assign_dur(dur);
+
+        self.play_track()
+        
+        
+    #author:houngj
+    #def LiveFilelist(self):
+    #    for File in self.new_livelist:
+    #        print File['title']
+            
+            
         
     def play_track(self):        
         self.livelist_replace_if_changed()
@@ -411,6 +453,9 @@ class LiveShow:
               the parameters for that type
               selected_track is a dictionary for the track/show
         """
+        
+        
+        
         self.canvas.delete('pp-content')
         
         # is menu required

@@ -133,10 +133,13 @@ class PiPresents:
         self.showlist_file= self.pp_profile+ "/pp_showlist.json"
         if os.path.exists(self.showlist_file):
             self.showlist.open_json(self.showlist_file)
+            
         else:
             self.mon.err(self,"showlist not found at "+self.showlist_file)
             self.end('error','showlist not found')
-
+        
+        #print self.showlist.print_dur()
+        #print "SHOWLIST"
         # check profile and Pi Presents issues are compatible
         if float(self.showlist.sissue())<>float(self.pipresents_issue):
             self.mon.err(self,"Version of profile " + self.showlist.sissue() + " is not  same as Pi Presents, must exit")
@@ -267,22 +270,27 @@ class PiPresents:
         self.tod.init(pp_dir,self.pp_home,self.canvas,500)
         self.tod.poll()
 
-
+        
         # Create list of start shows initialise them and then run them
         self.run_start_shows()
 
         #start tkinter
         self.root.mainloop( )
 
-
+        
 
 # *********************
 #  RUN START SHOWS
 # ********************   
     def run_start_shows(self):
         #start show manager
-        show_id=-1 #start show
+        show_id=- 1 #start show
+        
         self.show_manager=ShowManager(show_id,self.showlist,self.starter_show,self.root,self.canvas,self.pp_dir,self.pp_profile,self.pp_home)
+
+        #print "SHOWLIST"
+        #self.showlist.print_list()
+        #print "SHOWLIST"
         
         #first time through so empty show register and set callback to terminate Pi Presents if all shows have ended.
         self.show_manager.init(self.all_shows_ended_callback)
@@ -423,6 +431,8 @@ class PiPresents:
 if __name__ == '__main__':
 
     pp = PiPresents()
+    ########JOETEST
+    
     #try:
         #pp = PiPresents()
     #except:

@@ -229,8 +229,12 @@ class ShowManager:
                                                         self.pp_home,
                                                         self.pp_profile)
                 self.set_running(index,show_obj)
+                
+                
                 show_obj.play(index,self._end_play_show,None,top=True,command='nil')
+                
                 return 'normal','concurrent show started'
+                
                 
             else:
                 return 'error',"unknown show type in start concurrent show - "+ show['type']
