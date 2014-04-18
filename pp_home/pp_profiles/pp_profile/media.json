@@ -19,7 +19,7 @@
    "plugin": "", 
    "show-control-begin": "", 
    "show-control-end": "", 
-   "text": "Welcome to Pi Presents\n\nThe command line options specified a profile that does not exist", 
+   "text": "Welcome to Pi Presents\n\nRunning the profile pp_profile in /home/pi/pp_home", 
    "thumbnail": "", 
    "title": "Hello World", 
    "track-ref": "", 

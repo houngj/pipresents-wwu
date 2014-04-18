@@ -47,7 +47,7 @@
    "trigger-end": "none", 
    "trigger-end-time": "", 
    "trigger-input": "", 
-   "trigger-next": "continue", 
+   "trigger-next": "none", 
    "type": "mediashow", 
    "web-window": "warp"
   }
